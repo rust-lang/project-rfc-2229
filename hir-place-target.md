@@ -31,9 +31,6 @@ struct Place<'tcx> {
 /// *Projections* select parts of the base expression; e.g.,
 /// in the place expression `a.b.c`, `b` and `c` are projections
 struct Projection<'tcx> {
-    /// Type before the projection is applied.
-    before_ty: Ty<'tcx>,
-
     /// type of the projection.
     kind: ProjectionKind,
 
