@@ -36,6 +36,7 @@ HIR has a similar construct, also called Place, which could be used to represent
 It was modified to meet our requirements, as follows:
 
 ### Decoupling information
+PR: https://github.com/rust-lang/rust/pull/73489
 
 The information about the expression was tightly coupled with the expression id. 
 Eg:`bar(foo.x, foo.x)`, each `foo.x` has it's own unique HirId.
@@ -45,9 +46,9 @@ The structure was split into two,
 1. `hir::Place` represents the information about the compiler, called.
 2. `hir::PlaceWithHirId` stores the association between `hir::Place` and the expression id as before.
 
-PR for refactor: https://github.com/rust-lang/rust/pull/73489
 
 ### Precise Projections
+PR: https://github.com/rust-lang/rust/pull/74140
 
 `hir::Place` only supported `Deref` and `Other` as ways of expression how a "place" is memory is being read.
 Taking notes from `mir::Place`, we added the following to support our analysis
@@ -150,7 +151,6 @@ This is equivalent to `Subsclice` [`mir::ProjectionKind`]
 
 
 
-PR for adding precise projections: https://github.com/rust-lang/rust/pull/74140
 
 
 ### Using Places as Closure Captures
