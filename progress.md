@@ -3,7 +3,7 @@
 This document lists the changes that were made to implement the RFC.
 ### Terms
 
-- **Current compiler**: Pre-RFC 2229 compiler
+- **Old compiler**: Pre-RFC 2229 compiler
 - **New compiler**: Post-RFC 2229 compiler
 
 ### Naming convention within the compiler
@@ -162,18 +162,48 @@ PR for adding precise projections: https://github.com/rust-lang/rust/pull/74140
 <summary> Talk about why the vec design didn't work </summary>
 </details>
 
-#### Proving Places can represent capture information
+#### Capture Analysis
+
+// TODO: insert link
+To understand how the old compiler did capture analysis, checkout: [closure_captures.md]
 
 - Talk about using bridge
 - Ignoring projections
 - Using place.ty() directly and how it works in both (ignore and not ignore) cases 
-
+- Intended use at this step:
+    - Keep closure_captures it allows us to answer questions like if a root variable is part of a captured 
+    
+    ath quickly
 
 
 ### Capture Rules
 
 - Precise paths only matter for Structs and Tuples.
 - For arrays non-overlapping parts are not considered disjoint. (even outside the context of closures).
+
+
+### ClosureSubsts
+
+This helps represent the closure in a desugared form.
+It consists of:
+- The closure type: Fn/FnMut/FnOnce. This is done using type variables so, eg: Fn is assigned u8 etc.
+- The closure signature
+- A tuple containing the list of types of captured variables.
+
+Before capture analysis the old compiler could create a tuple of inference variables of a known arity, when the ClosureSubsts are created.
+This is because we knew the root variables that were going to be captured and this was same as the number of paths captured.
+These inference variables were then replaced with their types after capture analysis.
+
+However in the new compiler, number of captures will be atleast the number of root variables captured but we won't know the 
+exact number until we do the capture analysis. To deal with the case, instead of create a tuple of inference variables in ClosureSubsts,
+we create a single inference variable that then gets replaces with a tuple of closure capture types.
+
+We need to make sure that we handle this change properly, the type is no more `ty::Tuple` until the analysis happens.
+We rely on `infcx.shallow_resolve(substs.tupled_upvars)` to check if inference variable has been resolved, i.e. the type isn't `ty::Infer`.
+Depending on the how this is used we will deal with at the site.
+- trait_selection:
+- pretty.rs: We don't have infcx context so we won't be printing the type information of the captures.
+- typeck/coercion: We just need to know if closure captures any variables or not, so that we can decide if we want to coerce it to a FnPtr. We can just check upvars_mentioned to know if there are captured root variables. 
 
 [root variables]: https://github.com/rust-lang/project-rfc-2229/blob/master/closure_captures.md#root-variable
 [`mir::Place`]: https://doc.rust-lang.org/nightly/nightly-rustc/rustc_middle/mir/struct.Place.html
