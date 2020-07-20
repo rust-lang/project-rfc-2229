@@ -161,12 +161,28 @@ This is equivalent to `Subsclice` [`mir::ProjectionKind`]
 
 #### Capture Analysis
 
-// TODO: insert link
 To understand how the old compiler did capture analysis, checkout: [closure_captures.md]
 
-- Talk about using bridge
-- Ignoring projections
-- Using place.ty() directly and how it works in both (ignore and not ignore) cases 
+- As an initial proof of concept we build a bridge between the new `capture_information` and `closure_captures` and `upvar_capture_map`.
+We generate the new structure (`capture_information`) and use it to build the old structures. It proves that
+    - We captured atleast one path with the root variable correctly i.e. with the correct capture kind
+    - No paths for the root variable were captured that ended up escalating the overal capture kind
+    - Is it enough? No. eg
+    ```rust
+    let || { 
+        p.x += 10;
+        p.y += 10;
+    }
+    ```
+    Correct capture would be p.x and p.y with mut ref, 
+    but even in the case where p.x marked as captured via MutRef and p.y as ImmutRef, with the bridge
+    it would make it look like p is captured via MutRef (same as old compiler) even though for our end use, information we generate is corrected.
+- In an attempt to keep the old compiler behave as is until we are ready to use all the different information that
+is available to us, when `ExprUseVisitor` callsback into `InferBorrowKind` we can drop the projections from `hir::Place` 
+because the remaining `hir::Place` just represents the root variable, which is what the old compiler stored as captures.
+- Once we are ready to use exact paths, we will just stop dropping the projections.
+- Since the new compiler uses Place to store capture information and we store type information within the place, 
+we can rely on `place.ty()`
 - Keep closure_captures it allows us to answer questions like if a root variable is part of a captured 
 path quickly
 
@@ -209,4 +225,5 @@ Depending on the how this is used we will deal with at the site.
 [`EnumerateAndAdjust`]: https://doc.rust-lang.org/nightly/nightly-rustc/src/rustc_hir/pat_util.rs.html#33
 [EnumerateAndAdjustUsecase]: https://github.com/rust-lang/rust/blob/master/src/librustc_typeck/check/pat.rs#L1006
 [Zulip Stream for using Places]: https://rust-lang.zulipchat.com/#narrow/stream/189812-t-compiler.2Fwg-rfc-2229/topic/Typecheck.20tables.20using.20Places
+[closure_captures.md]: https://github.com/rust-lang/project-rfc-2229/blob/master/closure_captures.md
 
