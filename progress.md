@@ -150,9 +150,6 @@ Same as `Index`, but used for subslices.
 This is equivalent to `Subsclice` [`mir::ProjectionKind`]
 
 
-
-
-
 ### Using Places as Closure Captures
 
 - [Zulip Stream for using Places]
@@ -170,10 +167,8 @@ To understand how the old compiler did capture analysis, checkout: [closure_capt
 - Talk about using bridge
 - Ignoring projections
 - Using place.ty() directly and how it works in both (ignore and not ignore) cases 
-- Intended use at this step:
-    - Keep closure_captures it allows us to answer questions like if a root variable is part of a captured 
-    
-    ath quickly
+- Keep closure_captures it allows us to answer questions like if a root variable is part of a captured 
+path quickly
 
 
 ### Capture Rules
