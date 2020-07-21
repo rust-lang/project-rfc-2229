@@ -4,6 +4,7 @@ This document lists the changes that were made to implement the RFC.
 ### Terms
 
 - **Old compiler**: Pre-RFC 2229 compiler
+- **Intermediate compiler**: Compiler while implementing the RFC
 - **New compiler**: Post-RFC 2229 compiler
 
 ### Naming convention within the compiler
@@ -45,6 +46,9 @@ This adds overhead when keep track of information and in general working with it
 The structure was split into two, 
 1. `hir::Place` represents the information about the compiler, called.
 2. `hir::PlaceWithHirId` stores the association between `hir::Place` and the expression id as before.
+
+
+### Type information in projections
 
 
 ### Precise Projections
@@ -150,6 +154,7 @@ Same as `Index`, but used for subslices.
 This is equivalent to `Subsclice` [`mir::ProjectionKind`]
 
 
+
 ### Using Places as Closure Captures
 
 - [Zulip Stream for using Places]
@@ -163,7 +168,7 @@ This is equivalent to `Subsclice` [`mir::ProjectionKind`]
 
 To understand how the old compiler did capture analysis, checkout: [closure_captures.md]
 
-- As an initial proof of concept we build a bridge between the new `capture_information` and `closure_captures` and `upvar_capture_map`.
+- As an initial proof of concept we built a bridge between the new `capture_information` and old `closure_captures` and `upvar_capture_map`.
 We generate the new structure (`capture_information`) and use it to build the old structures. It proves that
     - We captured atleast one path with the root variable correctly i.e. with the correct capture kind
     - No paths for the root variable were captured that ended up escalating the overal capture kind
@@ -177,13 +182,14 @@ We generate the new structure (`capture_information`) and use it to build the ol
     Correct capture would be p.x and p.y with mut ref, 
     but even in the case where p.x marked as captured via MutRef and p.y as ImmutRef, with the bridge
     it would make it look like p is captured via MutRef (same as old compiler) even though for our end use, information we generate is corrected.
-- In an attempt to keep the old compiler behave as is until we are ready to use all the different information that
-is available to us, when `ExprUseVisitor` callsback into `InferBorrowKind` we can drop the projections from `hir::Place` 
-because the remaining `hir::Place` just represents the root variable, which is what the old compiler stored as captures.
+- In an attempt to keep the intermediate compiler behave same as the old one, that is until we are ready to use all the information about paths that
+is available to us, when `ExprUseVisitor` calls back into `InferBorrowKind` we can drop the projections from the `hir::Place` 
+because the remaining `hir::Place` just represents the root variable, which is what the old compiler captured.
 - Once we are ready to use exact paths, we will just stop dropping the projections.
-- Since the new compiler uses Place to store capture information and we store type information within the place, 
-we can rely on `place.ty()`
-- Keep closure_captures it allows us to answer questions like if a root variable is part of a captured 
+- Since the intermediate and the new compiler use Place to store capture information and we store type information within the place, 
+we can rely on `place.ty()` to get information about the path being captured. This works even in the case we ignore projections 
+because `.ty()` then returns type of the root variable.
+- Keep closure_captures as it allows us to answer questions like if a root variable is part of a captured 
 path quickly
 
 
