@@ -49,6 +49,7 @@ The structure was split into two,
 
 
 ### Type information in projections
+PR: https://github.com/rust-lang/rust/pull/73870
 
 
 ### Precise Projections
@@ -58,7 +59,7 @@ PR: https://github.com/rust-lang/rust/pull/74140
 Taking notes from `mir::Place`, we added the following to support our analysis
 
 #### `Field(u32, VariantIdx)`
-This stores information about access from a [ADT] (struct, union of field). 
+This stores information about access from a [ADT] (struct, tuple or union). 
 
 Fields within an ADT can be thought of to be indexed starting at 0. Similarly variants within an
 enum are indexed starting at 0. Structures and unions can be thought of having only one variant
@@ -153,6 +154,13 @@ This is equivalent to `Index` [`mir::ProjectionKind`]
 Same as `Index`, but used for subslices.
 This is equivalent to `Subsclice` [`mir::ProjectionKind`]
 
+### Handling circular dependency
+PR: https://github.com/rust-lang/rust/pull/73870
+
+`rustc_typeck` depends on `rustc_middle` for definition TypeckTables (stores capture information among other things), etc.
+For using `hir::Place` (used to be defined in typeck) to store capture information, 
+`rustc_middle` would've to depend on
+`rustc_typeck` -- introducing a circular dependency.
 
 
 ### Using Places as Closure Captures
@@ -205,10 +213,11 @@ Check out the [meetings.md] on May 12th, to understand how closures are desugare
 
 ClosureSubsts helps represent the closure in a desugared form.
 It consists of:
+
 // TODO: get the check what type is assigned to Fn
 - The closure type: Fn/FnMut/FnOnce. This is done using type variables so, eg: Fn is assigned u8 etc.
 - The closure signature
-- A tuple containing the list of types of captured variables.
+- A tuple containing the type of each captured path.
 
 Before capture analysis the old compiler could create a tuple of inference variables of a known arity, when the ClosureSubsts are created.
 This is because we knew the root variables that were going to be captured and this was same as the number of paths captured.
