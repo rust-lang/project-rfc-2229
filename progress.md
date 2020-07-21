@@ -199,10 +199,13 @@ path quickly
 - For arrays non-overlapping parts are not considered disjoint. (even outside the context of closures).
 
 
-### ClosureSubsts
+### Lazy generate upvar types tuple
 
-This helps represent the closure in a desugared form.
+Check out the [meetings.md] on May 12th, to understand how closures are desugared. The high level idea stays the same.
+
+ClosureSubsts helps represent the closure in a desugared form.
 It consists of:
+// TODO: get the check what type is assigned to Fn
 - The closure type: Fn/FnMut/FnOnce. This is done using type variables so, eg: Fn is assigned u8 etc.
 - The closure signature
 - A tuple containing the list of types of captured variables.
@@ -233,3 +236,4 @@ Depending on the how this is used we will deal with at the site.
 [Zulip Stream for using Places]: https://rust-lang.zulipchat.com/#narrow/stream/189812-t-compiler.2Fwg-rfc-2229/topic/Typecheck.20tables.20using.20Places
 [closure_captures.md]: https://github.com/rust-lang/project-rfc-2229/blob/master/closure_captures.md
 
+[meetings.md]: https://github.com/rust-lang/project-rfc-2229/blob/master/meetings.md
