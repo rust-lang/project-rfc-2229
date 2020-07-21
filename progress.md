@@ -174,7 +174,7 @@ We generate the new structure (`capture_information`) and use it to build the ol
     - No paths for the root variable were captured that ended up escalating the overal capture kind
     - Is it enough? No. eg
     ```rust
-    let || { 
+    let c = || { 
         p.x += 10;
         p.y += 10;
     }
