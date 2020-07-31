@@ -28,4 +28,4 @@ let c = || {
 let f : fn() = c; 
 ```
 
-The above code works now because `x` isn't captured by `c` anymore making `c` a non-capturing closure, which can be coerced to a `FnPtr`
+The above code works now because `x` isn't captured by `c` anymore, making `c` a non-capturing closure, which can be coerced to a `FnPtr`.
