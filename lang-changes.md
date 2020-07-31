@@ -7,6 +7,7 @@ For this document let RS20 be the pre-RFC compiler and RS21 be the post-RFC comp
 ## `_` pattern in closures
 
 Consider the following code 
+
 ```rust 
 let x;
 let c = || {
@@ -17,7 +18,8 @@ let c = || {
 RS20 will result in the capture of x within the closure, but `_` is just an ignore/discard and that means x can't/won't be used within the closure and should not result in a capture.
 
 For RS21 we propose to ignore such captures allowing the following code to be accepted by RS21
-```
+
+```rust
 let x;
 let c = || {
       let _ = x;
