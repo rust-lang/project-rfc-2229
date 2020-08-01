@@ -1,6 +1,6 @@
 # Language Changes
 
-This document lists changes that will be made to language along with RFC-2229.
+This document lists changes that will be made to the language along with RFC-2229.
 
 For this document let RS20 be the pre-RFC compiler and RS21 be the post-RFC compiler.
 
